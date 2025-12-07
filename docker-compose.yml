@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16.9
+    container_name: coderDb
+    restart: always
+    environment:
+      - POSTGRES_USER=coder
+      - POSTGRES_PASSWORD=coder123
+      - POSTGRES_DB=coderdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - coderdb_data:/var/lib/postgresql/data
+
+volumes:
+  coderdb_data:
+
+

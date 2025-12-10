@@ -5,13 +5,13 @@ export const appRouter = createTRPCRouter({
   inoke:baseProcedure
     .input(
       z.object({
-        name: z.string().min(1),
+        value: z.string().min(1),
       }),
     )
     .mutation( async ({input}) => {
       await inngest.send({
         name: 'test/hello.world',
-        data: { email: input.name },
+        data: { email: input.value },
       })
     }),
   createAi: baseProcedure

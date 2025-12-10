@@ -11,7 +11,7 @@ export const appRouter = createTRPCRouter({
     .mutation( async ({input}) => {
       await inngest.send({
         name: 'test/hello.world',
-        data: { email: input.value },
+        data: { value: input.value },
       })
     }),
   createAi: baseProcedure

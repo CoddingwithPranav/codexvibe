@@ -3,23 +3,33 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTRPC } from "@/trpc/client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/router";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default  function Home() {
+  const router = useRouter();
   const [value, setValue] = useState("");
   const trpc = useTRPC();
-  const {data:messages} = useQuery(trpc.message.getMany.queryOptions());
+  const createProject = useMutation(trpc.projects.create.mutationOptions({
+    onError:(error)=>{
+      toast.error(error.message);
+    },
+    onSuccess:(data)=>{
+      toast.success("Project Created Successfully");
+      router.push(`/projects/${data.id}`);
+    }
+  }));
 
-  const createMessage = useMutation(trpc.message.create.mutationOptions({}))
   return (
-    <div className="p-4 max-w-7xl mx-auto">
+    <div className="h-screen w-screen flex items-center justify-center  bg-lime-500">
+      <div className="max-w-7xl  h-12 mx-auto flex items-center flex-col gap-4 justify-center ">
       <Input value={value} onChange={(e) => setValue(e.target.value)} />
-      <Button onClick={()=>{createMessage.mutate({value:value})}} variant="default">Invoke Background Job</Button>
+      <Button disabled={createProject.isPending} onClick={()=>{createProject.mutate({value:value})}} variant="default">Submit</Button>
 
-
+</div>
      <div>
-      {JSON.stringify(messages)}
      </div>
     </div>
   );

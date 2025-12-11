@@ -7,3 +7,33 @@ datasource db {
   provider = "postgresql"
 }
 
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+enum MessageType {
+  RESULT
+  ERROR
+}
+
+model message {
+  id        String      @id @default(uuid())
+  content   String
+  role      MessageRole
+  type      MessageType
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  fragment  fragment?
+}
+
+model fragment {
+  id         String   @id @default(uuid())
+  MessageId  String   @unique
+  message    message  @relation(fields: [MessageId], references: [id], onDelete: Cascade)
+  title      String
+  sandboxUrl String
+  files      Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}

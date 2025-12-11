@@ -3,39 +3,54 @@ import { prisma } from "@/lib/db";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import z from "zod";
 
-
 export const messagesRouter = createTRPCRouter({
-    getMany:baseProcedure.query(async () => {
-        const messages = await prisma.message.findMany({
-            orderBy:{
-                updatedAt:"desc"
-            }
-        });
-        return messages;
-    }),
-    create: baseProcedure.input(z.object({
-        value: z.string().min(1, { message: "Prompt is Required" }).max(1000, { message: "Prompt is too long" }),
+  getMany: baseProcedure
+    .input(
+      z.object({
         projectId: z.string().min(1, { message: "Project ID is Required" }),
-    })).mutation(async ({ input }) => {
-        const newMessage = await prisma.message.create({
-            data:{
-                content: input.value,
-                projectId: input.projectId,
-                role: "USER",
-                type:"RESULT",
-            },
-        });
+      })
+    )
+    .query(async ({input}) => {
+      const messages = await prisma.message.findMany({
+        where: {
+          projectId: input.projectId,
+        },
+        include:{
+          fragment:true
+        },
+        orderBy: {
+          updatedAt: "asc",
+        },
+      });
+      return messages;
+    }),
+  create: baseProcedure
+    .input(
+      z.object({
+        value: z
+          .string()
+          .min(1, { message: "Prompt is Required" })
+          .max(1000, { message: "Prompt is too long" }),
+        projectId: z.string().min(1, { message: "Project ID is Required" }),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const newMessage = await prisma.message.create({
+        data: {
+          content: input.value,
+          projectId: input.projectId,
+          role: "USER",
+          type: "RESULT",
+        },
+      });
 
-        await inngest.send({
-            name:"code-agent/run",
-            data:{
-                value: input.value,
-                projectId: input.projectId,
-            }
-        })
-        return newMessage;
+      await inngest.send({
+        name: "code-agent/run",
+        data: {
+          value: input.value,
+          projectId: input.projectId,
+        },
+      });
+      return newMessage;
     }),
 });
-
-
-

@@ -21,10 +21,25 @@ import {
 
 type FileCollection = { [path: string]: string };
 
+const languageMap: Record<string, string> = {
+  js: "javascript",
+  jsx: "jsx",
+  ts: "typescript",
+  tsx: "typescript",
+  css: "css",
+  html: "html",
+  json: "json",
+  md: "markdown",
+  txt: "text",
+};
+
+function getPrismLanguage(extension: string): string {
+  return languageMap[extension.toLowerCase()] || "text"; // fallback to plain text
+}
 function getLanaguageFromExtension(fileName: string): string {
   const extension = fileName.split(".").pop()?.toLowerCase();
 
-  return extension || "text";
+  return getPrismLanguage(extension || "") || "text";
 }
 
 interface FileBreadcrumbsProps {
@@ -142,7 +157,6 @@ export const FileExplorer = ({ files }: FileExplorerProps) => {
             </div>
             <div className="flex-1 overflow-auto">
 
-              {/* TODO:FIX color problem  */}
               <CodeView
                 code={files[selectedFile]}
                 lang={getLanaguageFromExtension(selectedFile)}

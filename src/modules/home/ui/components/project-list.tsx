@@ -43,7 +43,7 @@ export const ProjectList = () => {
                             <h3 className="truncate font-medium">
                                 {project.name}
                             </h3>
-                            <p className="text-sm text-muted dark:text-muted-foreground">
+                            <p className="text-sm  dark:text-muted-foreground">
                                 {formatDistanceToNow(project.updatedAt, { addSuffix: true })}
                             </p>
                          </div>

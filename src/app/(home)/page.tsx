@@ -22,8 +22,7 @@ export default function Page() {
            Build Something with CodeXVibe
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground text-center">
-          Create your first project to get started with CodeXVibe. Explore the
-          features and unleash your creativity!
+          Create your first project to get started with CodeXVibe.
         </p>
         <div className="max-w-3xl mx-auto w-full">
             <ProjectForm/>

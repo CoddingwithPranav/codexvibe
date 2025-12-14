@@ -70,11 +70,11 @@ const Tree = ({
     return (
       <SidebarMenuButton
         isActive={isSelected}
-        className="data-[active=true]:bg-transparent "
+        className="data-[active=true]:bg-transparent dark:text-muted-foreground"
         onClick={() => onSelect?.(currentPath)}
       >
         <FileIcon />
-        <span className="truncate">{name}</span>
+        <span className="truncate ">{name}</span>
       </SidebarMenuButton>
     );
   }

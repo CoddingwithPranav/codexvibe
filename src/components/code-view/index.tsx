@@ -15,6 +15,7 @@ interface Props {
   lang: string;
 }
 
+
 export const CodeView = ({ code, lang }: Props) => {
     useEffect(()=>{
         Prism.highlightAll();

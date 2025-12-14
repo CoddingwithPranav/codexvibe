@@ -18,6 +18,7 @@ export const MessagesContainer = ({
   setActiveFragment,
 }: Props) => {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const lastAssistantMessageIdRef = useRef<string | null>(null);
   const trpc = useTRPC();
   const { data: messages } = useSuspenseQuery(
     trpc.message.getMany.queryOptions(
@@ -28,14 +29,13 @@ export const MessagesContainer = ({
   );
 
   //TODO : this is causing problem 
-  // useEffect(() => {
-  //   const lastAssistantMessageWithFragment = messages?.findLast(
-  //     (msg) => msg.role === "ASSISTANT" && !!msg.fragment
-  //   );
-  //   if (lastAssistantMessageWithFragment) {
-  //     setActiveFragment(lastAssistantMessageWithFragment.fragment);
-  //   }
-  // }, [messages, setActiveFragment]);
+  useEffect(() => {
+    const lastAssistantMessage =  messages.findLast((m) => m.role === "ASSISTANT");
+    if(lastAssistantMessage?.fragment && lastAssistantMessage.id !== lastAssistantMessageIdRef.current){
+      setActiveFragment(lastAssistantMessage.fragment);
+      lastAssistantMessageIdRef.current = lastAssistantMessage.id;
+    }
+  }, [messages, setActiveFragment]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView();

@@ -141,6 +141,8 @@ export const FileExplorer = ({ files }: FileExplorerProps) => {
               </Hint>
             </div>
             <div className="flex-1 overflow-auto">
+
+              {/* TODO:FIX color problem  */}
               <CodeView
                 code={files[selectedFile]}
                 lang={getLanaguageFromExtension(selectedFile)}

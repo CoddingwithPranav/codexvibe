@@ -34,7 +34,7 @@ const ShimmerMessage = () => {
 export const MessageLoading = () => {
   return (
     <div className="flex flex-col group px-2 pb-4">
-      <div className="flex items-center gap-23">
+      <div className="flex items-center gap-2">
         <Image
           src="/logo.svg"
           alt="vibe"

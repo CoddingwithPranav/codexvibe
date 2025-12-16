@@ -8,8 +8,10 @@ import TextareaAutosize from "react-textarea-autosize";
 import { Button } from "@/components/ui/button";
 import { ArrowUpIcon, Loader2Icon } from "lucide-react";
 import { useTRPC } from "@/trpc/client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Usage } from "./usage";
+import { useRouter } from "next/navigation";
 interface Props {
   projectId: string;
 }
@@ -23,9 +25,11 @@ const formSchema = z.object({
 });
 
 export const MessageForm = ({ projectId }: Props) => {
+  const trpc = useTRPC();
+  const router = useRouter();
   const [isFocused, setIsFocused] = useState(false);
-  const showUsage = false;
-  const queryClient  = useQueryClient();
+  const queryClient = useQueryClient();
+  const { data: usage } = useQuery(trpc.usage.status.queryOptions());
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -33,19 +37,26 @@ export const MessageForm = ({ projectId }: Props) => {
     },
   });
 
-  const trpc = useTRPC();
-  const createMessage = useMutation(trpc.message.create.mutationOptions({
-    onSuccess:(data)=>{
+  const showUsage = !!usage;
+  const createMessage = useMutation(
+    trpc.message.create.mutationOptions({
+      onSuccess: (data) => {
         form.reset();
-        queryClient.invalidateQueries(trpc.message.getMany.queryOptions({projectId}));
+        queryClient.invalidateQueries(
+          trpc.message.getMany.queryOptions({ projectId })
+        );
 
-        //TODO:Invalidate usage status
-    },
-    onError:(error)=>{
-        //TODO:Redirect to pricing page if specific error 
+        queryClient.invalidateQueries(trpc.usage.status.queryOptions());
+      },
+      onError: (error) => {
+        
         toast.error(error.message);
-    }
-  }));
+        if( error.data?.code === "TOO_MANY_REQUESTS"){
+          router.push("/pricing");
+        }
+      },
+    })
+  );
 
   const isPending = createMessage.isPending;
   const isButtonDisabled = isPending || !form.formState.isValid;
@@ -59,6 +70,12 @@ export const MessageForm = ({ projectId }: Props) => {
 
   return (
     <Form {...form}>
+      {showUsage && (
+        <Usage
+          points={usage.remainingPoints}
+          msBeforeNext={usage.msBeforeNext}
+        />
+      )}
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn(
@@ -97,14 +114,16 @@ export const MessageForm = ({ projectId }: Props) => {
             &nbsp;to submit
           </div>
           <Button
-            className={cn("size-8 rounded-full", isButtonDisabled && "bg-muted-foreground border")}
+            className={cn(
+              "size-8 rounded-full",
+              isButtonDisabled && "bg-muted-foreground border"
+            )}
             disabled={isButtonDisabled}
           >
             {isPending ? (
-                <Loader2Icon className="size-4 animate-spin"/>
-            ):(
-
-            <ArrowUpIcon />
+              <Loader2Icon className="size-4 animate-spin" />
+            ) : (
+              <ArrowUpIcon />
             )}
           </Button>
         </div>

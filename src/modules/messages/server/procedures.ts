@@ -1,5 +1,6 @@
 import { inngest } from "@/inngest/client";
 import { prisma } from "@/lib/db";
+import { consumeCredit } from "@/lib/usage";
 import { protectedProcedure, createTRPCRouter } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
 import z from "zod";
@@ -11,16 +12,16 @@ export const messagesRouter = createTRPCRouter({
         projectId: z.string().min(1, { message: "Project ID is Required" }),
       })
     )
-    .query(async ({input, ctx}) => {
+    .query(async ({ input, ctx }) => {
       const messages = await prisma.message.findMany({
         where: {
           projectId: input.projectId,
-          project:{
+          project: {
             userId: ctx.auth.userId,
-          }
+          },
         },
-        include:{
-          fragment:true
+        include: {
+          fragment: true,
         },
         orderBy: {
           updatedAt: "asc",
@@ -40,16 +41,32 @@ export const messagesRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const existingProject = await prisma.project.findUnique({
-        where:{
+        where: {
           id: input.projectId,
           userId: ctx.auth.userId,
-        }
-      })
-      if(!existingProject){
+        },
+      });
+      if (!existingProject) {
         throw new TRPCError({
-          code:"NOT_FOUND",
-          message:"Project not found"
+          code: "NOT_FOUND",
+          message: "Project not found",
         });
+      }
+      try {
+        await consumeCredit();
+      } catch (error) {
+        if (error instanceof Error) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Something went wrong",
+          });
+        } else {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message:
+              "You have exhausted your free credits. Please upgrade to continue using the service.",
+          });
+        }
       }
       const newMessage = await prisma.message.create({
         data: {

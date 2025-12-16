@@ -4,27 +4,30 @@ import { protectedProcedure, createTRPCRouter } from "@/trpc/init";
 import z from "zod";
 import { generateSlug } from "random-word-slugs";
 import { TRPCError } from "@trpc/server";
+import { consumeCredit } from "@/lib/usage";
 
 export const projectsRouter = createTRPCRouter({
   getOne: protectedProcedure
-    .input(z.object({
-      id: z.string().min(1, { message: "Project ID is required" }),
-    }))
-    .query(async ({input, ctx}) => {
+    .input(
+      z.object({
+        id: z.string().min(1, { message: "Project ID is required" }),
+      })
+    )
+    .query(async ({ input, ctx }) => {
       const existingProject = await prisma.project.findUnique({
-        where: { id: input.id , userId: ctx.auth.userId },
+        where: { id: input.id, userId: ctx.auth.userId },
       });
-      if(!existingProject){
+      if (!existingProject) {
         throw new TRPCError({
-          code:"NOT_FOUND",
-          message:"Project not found"
+          code: "NOT_FOUND",
+          message: "Project not found",
         });
       }
       return existingProject;
     }),
-  getMany: protectedProcedure.query(async ({ctx}) => {
+  getMany: protectedProcedure.query(async ({ ctx }) => {
     const projects = await prisma.project.findMany({
-      where:{
+      where: {
         userId: ctx.auth.userId,
       },
       orderBy: {
@@ -42,7 +45,26 @@ export const projectsRouter = createTRPCRouter({
           .max(1000, { message: "Promptz is too long" }),
       })
     )
-    .mutation(async ({ input , ctx}) => {
+    .mutation(async ({ input, ctx }) => {
+      try {
+        await consumeCredit();
+        console.log("Credit consumed successfully");
+      } catch (error) {
+        console.error("Error consuming credit:", error);
+        if (error instanceof Error) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Something went wrong",
+          });
+        } else {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message:
+              "You have exhausted your free credits. Please upgrade to continue using the service.",
+          });
+        }
+      }
+
       const createdProject = await prisma.project.create({
         data: {
           name: generateSlug(2, { format: "kebab" }),

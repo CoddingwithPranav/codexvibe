@@ -13,6 +13,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { PROJECT_TEMPLATES } from "../../constants";
+import { useClerk } from "@clerk/nextjs";
 interface Props {
   projectId: string;
 }
@@ -37,6 +38,7 @@ export const ProjectForm = () => {
   });
 
   const trpc = useTRPC();
+  const clerk = useClerk();
   const createProject = useMutation(
     trpc.projects.create.mutationOptions({
       onSuccess: (data) => {
@@ -45,8 +47,11 @@ export const ProjectForm = () => {
         //TODO:Invalidate usage status
       },
       onError: (error) => {
-        //TODO:Redirect to pricing page if specific error
         toast.error(error.message);
+        if(error?.data?.code === "UNAUTHORIZED"){
+          clerk.openSignIn();
+          return;
+        }
       },
     })
   );

@@ -15,6 +15,7 @@ import { getSandbox, lastAssistantTextMessageContent } from "./utils";
 import z, { object } from "zod";
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from "@/prompt";
 import { prisma } from "@/lib/db";
+import { SANDBOX_TIMEOUT } from "./types";
 
 interface AgentState {
   summary: string;
@@ -25,7 +26,9 @@ export const codeAgentFunction = inngest.createFunction(
   { event: "code-agent/run" },
   async ({ event, step }) => {
     const sandboxId = await step.run("get-sandbox-id", async () => {
+
       const sandbox = await Sandbox.create("vib-next-js");
+      await sandbox.setTimeout(SANDBOX_TIMEOUT); 
       return sandbox.sandboxId;
     });
 
@@ -36,6 +39,7 @@ export const codeAgentFunction = inngest.createFunction(
         const messages = await prisma.message.findMany({
           where: { projectId: event.data.projectId },
           orderBy: { createdAt: "desc" }, //TODO: Change to asc if AI does not understand context
+          take: 5,
         });
         for (const message of messages) {
           formattedMessages.push({
@@ -43,8 +47,8 @@ export const codeAgentFunction = inngest.createFunction(
             role: message.role === "ASSISTANT" ? "assistant" : "user",
             content: message.content,
           });
-        }
-        return formattedMessages;
+        } 
+        return formattedMessages.reverse();
       }
     );
 

@@ -1,7 +1,6 @@
 import { Hint } from "@/components/hint";
 import { Button } from "@/components/ui/button";
 import { fragment } from "@/generated/prisma/client";
-import { se } from "date-fns/locale";
 import { ExternalLink, RefreshCcw } from "lucide-react";
 import { useState } from "react";
 

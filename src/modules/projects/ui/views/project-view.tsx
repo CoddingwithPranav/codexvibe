@@ -6,7 +6,7 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { MessagesContainer } from "../components/message-container";
-import { Fragment, Suspense, useState } from "react";
+import {  Suspense, useState } from "react";
 import { fragment } from "@/generated/prisma/client";
 import { ProjectHeader } from "../components/project-header";
 import { FragmentWeb } from "../components/fragment-web";

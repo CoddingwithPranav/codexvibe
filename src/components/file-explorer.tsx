@@ -6,7 +6,7 @@ import {
 } from "./ui/resizable";
 import { Hint } from "./hint";
 import { Button } from "./ui/button";
-import { Code, CopyCheckIcon, CopyIcon } from "lucide-react";
+import {  CopyCheckIcon, CopyIcon } from "lucide-react";
 import { CodeView } from "./code-view";
 import { convertFilesToTreeItems } from "@/lib/utils";
 import { TreeView } from "./tree-view";

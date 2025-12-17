@@ -14,9 +14,6 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { PROJECT_TEMPLATES } from "../../constants";
 import { useClerk } from "@clerk/nextjs";
-interface Props {
-  projectId: string;
-}
 
 const formSchema = z.object({
   value: z

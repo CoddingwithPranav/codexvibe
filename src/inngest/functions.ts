@@ -1,18 +1,16 @@
 import { inngest } from "./client";
 import {
-  Agent,
   createAgent,
   createNetwork,
   createState,
   createTool,
-  gemini,
   Message,
   openai,
   Tool,
 } from "@inngest/agent-kit";
 import { Sandbox } from "@e2b/code-interpreter";
 import { getSandbox, lastAssistantTextMessageContent } from "./utils";
-import z, { object } from "zod";
+import z from "zod";
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from "@/prompt";
 import { prisma } from "@/lib/db";
 import { SANDBOX_TIMEOUT } from "./types";
@@ -145,7 +143,7 @@ export const codeAgentFunction = inngest.createFunction(
           }),
           handler: async (
             { files },
-            { step, network }: Tool.Options<AgentState>
+            { step }: Tool.Options<AgentState>
           ) => {
             return await step?.run("readFiles", async () => {
               try {

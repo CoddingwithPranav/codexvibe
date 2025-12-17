@@ -41,7 +41,7 @@ export const ProjectHeader = ({ projectId }: Props) => {
           >
             <Image
               src="/logo.svg"
-              alt="vibe"
+              alt="Code X vibe Logo"
               width={18}
               height={18}
               className="shrink-0 mr-2"
